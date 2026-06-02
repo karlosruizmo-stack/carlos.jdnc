@@ -251,7 +251,8 @@ public class Main {
 
             ResultSet resultado = ps.executeQuery();
 
-            System.out.println("\n--- PRODUCTOS DE LA MARCA: " + marca + " ---");
+            System.out.println("\n--- Productos de la marca" +
+                    ": " + marca + " ---");
             System.out.printf("%-6s %-35s %-10s %-8s %s%n",
                     "ID", "Nombre", "Precio", "Stock", "Sección");
             System.out.println("-".repeat(75));
