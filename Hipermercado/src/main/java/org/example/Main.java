@@ -13,36 +13,54 @@ public class Main {
         int opcion;
 
         do {
-            System.out.println("""
-                    \n╔══════════════════════════════════════════╗
-                    ║          HIPERMERCADO - MENÚ             ║
-                    ╠══════════════════════════════════════════╣
-                    ║  1. Buscar producto por ID               ║
-                    ║  2. Crear producto nuevo                 ║
-                    ║  3. Filtrar por sección/categoría        ║
-                    ║  4. Eliminar un producto                 ║
-                    ║  5. Productos de una marca               ║
-                    ║  6. Productos con descuento activo       ║
-                    ║  7. Productos por rango de precio        ║
-                    ║  8. Buscar producto por nombre           ║
-                    ║  0. Salir                                ║
-                    ╚══════════════════════════════════════════╝
-                    Elige una opción: """);
+
+            System.out.println("     HIPERMERCADO - MENÚ             ");
+            System.out.println("1. Buscar producto por ID");
+            System.out.println("2. Crear producto nuevo");
+            System.out.println("3. Filtrar por sección/categoría");
+            System.out.println("4. Eliminar un producto");
+            System.out.println("5. Productos de una marca");
+            System.out.println("6. Productos con descuento activo");
+            System.out.println("7. Productos por rango de precio");
+            System.out.println("8. Buscar producto por nombre");
+            System.out.println("0. Salir");
+            System.out.println("========================================");
+            System.out.print("Elige una opción: ");
 
             opcion = sc.nextInt();
-            sc.nextLine();
+            sc.nextLine(); // Limpiar el buffer
 
             switch (opcion) {
-                case 1 -> buscarPorId(sc);
-                case 2 -> crearProducto(sc);
-                case 3 -> filtrarPorSeccion(sc);
-                case 4 -> eliminarProducto(sc);
-                case 5 -> productosPorMarca(sc);
-                case 6 -> productosConDescuento();
-                case 7 -> productosPorRangoPrecio(sc);
-                case 8 -> buscarPorNombre(sc);
-                case 0 -> System.out.println("¡Hasta luego!");
-                default -> System.out.println("Opción no válida.");
+                case 1:
+                    buscarPorId(sc);
+                    break;
+                case 2:
+                    crearProducto(sc);
+                    break;
+                case 3:
+                    filtrarPorSeccion(sc);
+                    break;
+                case 4:
+                    eliminarProducto(sc);
+                    break;
+                case 5:
+                    productosPorMarca(sc);
+                    break;
+                case 6:
+                    productosConDescuento();
+                    break;
+                case 7:
+                    productosPorRangoPrecio(sc);
+                    break;
+                case 8:
+                    buscarPorNombre(sc);
+                    break;
+                case 0:
+                    System.out.println("¡Hasta luego!");
+                    break;
+                default:
+                    System.out.println("Opción no válida.");
+                    break;
             }
 
         } while (opcion != 0);
@@ -55,18 +73,15 @@ public class Main {
         System.out.print("Introduce el ID del producto: ");
         int id = sc.nextInt();
 
-        String sql = """
-                SELECT p.id_producto, p.nombre, p.precio, p.stock,
-                       m.nombre AS marca, s.nombre AS seccion
-                FROM productos p
-                JOIN marcas   m ON p.id_marca   = m.id_marca
-                JOIN secciones s ON p.id_seccion = s.id_seccion
-                WHERE p.id_producto = ?
-                """;
+        String sql = "SELECT p.id_producto, p.nombre, p.precio, p.stock, " +
+                "m.nombre AS marca, s.nombre AS seccion " +
+                "FROM productos p " +
+                "JOIN marcas m ON p.id_marca = m.id_marca " +
+                "JOIN secciones s ON p.id_seccion = s.id_seccion " +
+                "WHERE p.id_producto = ?";
 
         try {
             Connection conexion = DriverManager.getConnection(url, usuario, contraseña);
-
             PreparedStatement ps = conexion.prepareStatement(sql);
             ps.setInt(1, id);
 
@@ -74,11 +89,11 @@ public class Main {
 
             if (resultado.next()) {
                 System.out.println("\n--- PRODUCTO ENCONTRADO ---");
-                System.out.println("ID:      " + resultado.getInt("id_producto"));
-                System.out.println("Nombre:  " + resultado.getString("nombre"));
-                System.out.println("Precio:  " + resultado.getDouble("precio") + " €");
-                System.out.println("Stock:   " + resultado.getInt("stock"));
-                System.out.println("Marca:   " + resultado.getString("marca"));
+                System.out.println("ID: " + resultado.getInt("id_producto"));
+                System.out.println("Nombre: " + resultado.getString("nombre"));
+                System.out.println("Precio: " + resultado.getDouble("precio") + " €");
+                System.out.println("Stock: " + resultado.getInt("stock"));
+                System.out.println("Marca: " + resultado.getString("marca"));
                 System.out.println("Sección: " + resultado.getString("seccion"));
             } else {
                 System.out.println("No se encontró ningún producto con ID " + id);
@@ -107,20 +122,16 @@ public class Main {
 
         System.out.print("Precio: ");
         double precio = sc.nextDouble();
-        sc.nextLine();
+        sc.nextLine(); // Limpiar buffer
 
         System.out.print("Código de barras (13 dígitos): ");
         String codigoBarras = sc.nextLine();
 
-        String sql = """
-                INSERT INTO productos
-                    (nombre, id_seccion, id_marca, precio, codigo_barras)
-                VALUES (?, ?, ?, ?, ?)
-                """;
+        String sql = "INSERT INTO productos (nombre, id_seccion, id_marca, precio, codigo_barras) " +
+                "VALUES (?, ?, ?, ?, ?)";
 
         try {
             Connection conexion = DriverManager.getConnection(url, usuario, contraseña);
-
             PreparedStatement ps = conexion.prepareStatement(sql);
             ps.setString(1, nombre);
             ps.setInt(2, idSeccion);
@@ -145,42 +156,36 @@ public class Main {
         }
     }
 
-    //Filtrar productos
+    // Filtrar productos
     static void filtrarPorSeccion(Scanner sc) {
-        System.out.print("Nombre de la sección (ej: Bebidas, Lácteos, Tecnología): ");
+        System.out.print("Nombre de la sección (ej: Bebidas, Lácteos): ");
         String seccion = sc.nextLine();
 
-        String sql = """
-                SELECT p.id_producto, p.nombre, p.precio, p.stock,
-                       m.nombre AS marca
-                FROM productos p
-                JOIN marcas    m ON p.id_marca   = m.id_marca
-                JOIN secciones s ON p.id_seccion = s.id_seccion
-                WHERE s.nombre = ?
-                ORDER BY p.nombre
-                """;
+        String sql = "SELECT p.id_producto, p.nombre, p.precio, p.stock, m.nombre AS marca " +
+                "FROM productos p " +
+                "JOIN marcas m ON p.id_marca = m.id_marca " +
+                "JOIN secciones s ON p.id_seccion = s.id_seccion " +
+                "WHERE s.nombre = ? " +
+                "ORDER BY p.nombre";
 
         try {
             Connection conexion = DriverManager.getConnection(url, usuario, contraseña);
-
             PreparedStatement ps = conexion.prepareStatement(sql);
             ps.setString(1, seccion);
 
             ResultSet resultado = ps.executeQuery();
 
             System.out.println("\n--- PRODUCTOS EN SECCIÓN: " + seccion + " ---");
-            System.out.printf("%-6s %-35s %-10s %-8s %s%n",
-                    "ID", "Nombre", "Precio", "Stock", "Marca");
-            System.out.println("-".repeat(75));
+            System.out.println("ID\tNombre\tPrecio\tStock\tMarca");
+            System.out.println("--------------------------------------------------");
 
             boolean hayResultados = false;
             while (resultado.next()) {
                 hayResultados = true;
-                System.out.printf("%-6d %-35s %-10.2f %-8d %s%n",
-                        resultado.getInt("id_producto"),
-                        resultado.getString("nombre"),
-                        resultado.getDouble("precio"),
-                        resultado.getInt("stock"),
+                System.out.println(resultado.getInt("id_producto") + "\t" +
+                        resultado.getString("nombre") + "\t" +
+                        resultado.getDouble("precio") + "€\t" +
+                        resultado.getInt("stock") + "\t" +
                         resultado.getString("marca"));
             }
 
@@ -207,7 +212,6 @@ public class Main {
 
         try {
             Connection conexion = DriverManager.getConnection(url, usuario, contraseña);
-
             PreparedStatement ps = conexion.prepareStatement(sql);
             ps.setInt(1, id);
 
@@ -230,46 +234,39 @@ public class Main {
 
     // Mostrar producto por marca
     static void productosPorMarca(Scanner sc) {
-        System.out.print("Nombre de la marca (ej: Coca-Cola, Nike, Samsung): ");
+        System.out.print("Nombre de la marca: ");
         String marca = sc.nextLine();
 
-        String sql = """
-                SELECT p.id_producto, p.nombre, p.precio, p.stock,
-                       s.nombre AS seccion
-                FROM productos p
-                JOIN marcas    m ON p.id_marca   = m.id_marca
-                JOIN secciones s ON p.id_seccion = s.id_seccion
-                WHERE m.nombre = ?
-                ORDER BY p.precio
-                """;
+        String sql = "SELECT p.id_producto, p.nombre, p.precio, p.stock, s.nombre AS seccion " +
+                "FROM productos p " +
+                "JOIN marcas m ON p.id_marca = m.id_marca " +
+                "JOIN secciones s ON p.id_seccion = s.id_seccion " +
+                "WHERE m.nombre = ? " +
+                "ORDER BY p.precio";
 
         try {
             Connection conexion = DriverManager.getConnection(url, usuario, contraseña);
-
             PreparedStatement ps = conexion.prepareStatement(sql);
             ps.setString(1, marca);
 
             ResultSet resultado = ps.executeQuery();
 
-            System.out.println("\n--- Productos de la marca" +
-                    ": " + marca + " ---");
-            System.out.printf("%-6s %-35s %-10s %-8s %s%n",
-                    "ID", "Nombre", "Precio", "Stock", "Sección");
-            System.out.println("-".repeat(75));
+            System.out.println("\n--- Productos de la marca: " + marca + " ---");
+            System.out.println("ID\tNombre\tPrecio\tStock\tSección");
+            System.out.println("--------------------------------------------------");
 
             boolean hayResultados = false;
             while (resultado.next()) {
                 hayResultados = true;
-                System.out.printf("%-6d %-35s %-10.2f %-8d %s%n",
-                        resultado.getInt("id_producto"),
-                        resultado.getString("nombre"),
-                        resultado.getDouble("precio"),
-                        resultado.getInt("stock"),
+                System.out.println(resultado.getInt("id_producto") + "\t" +
+                        resultado.getString("nombre") + "\t" +
+                        resultado.getDouble("precio") + "€\t" +
+                        resultado.getInt("stock") + "\t" +
                         resultado.getString("seccion"));
             }
 
             if (!hayResultados) {
-                System.out.println("No se encontraron productos de esa marca.");
+                System.out.println("No hay productos de esa marca.");
             }
 
             resultado.close();
@@ -282,18 +279,15 @@ public class Main {
         }
     }
 
-    // Que productos aun tienen descuento
+    // Qué productos aún tienen descuento
     static void productosConDescuento() {
-        String sql = """
-                SELECT p.id_producto, p.nombre, p.precio,
-                       p.descuento_pct,
-                       ROUND(p.precio - (p.precio * p.descuento_pct / 100), 2) AS precio_final,
-                       m.nombre AS marca
-                FROM productos p
-                JOIN marcas m ON p.id_marca = m.id_marca
-                WHERE p.descuento_pct > 0
-                ORDER BY p.descuento_pct DESC
-                """;
+        String sql = "SELECT p.id_producto, p.nombre, p.precio, p.descuento_pct, " +
+                "ROUND(p.precio - (p.precio * p.descuento_pct / 100), 2) AS precio_final, " +
+                "m.nombre AS marca " +
+                "FROM productos p " +
+                "JOIN marcas m ON p.id_marca = m.id_marca " +
+                "WHERE p.descuento_pct > 0 " +
+                "ORDER BY p.descuento_pct DESC";
 
         try {
             Connection conexion = DriverManager.getConnection(url, usuario, contraseña);
@@ -301,23 +295,21 @@ public class Main {
             ResultSet resultado = ps.executeQuery();
 
             System.out.println("\n--- PRODUCTOS EN OFERTA ---");
-            System.out.printf("%-6s %-30s %-8s %-10s %-12s %s%n",
-                    "ID", "Nombre", "Dto.%", "Precio", "Precio final", "Marca");
-            System.out.println("-".repeat(80));
+            System.out.println("ID\tNombre\tDto.%\tPrecio\tPrecio Final\tMarca");
+
 
             boolean hay = false;
             while (resultado.next()) {
                 hay = true;
-                System.out.printf("%-6d %-30s %-8d %-10.2f %-12.2f %s%n",
-                        resultado.getInt("id_producto"),
-                        resultado.getString("nombre"),
-                        resultado.getInt("descuento_pct"),
-                        resultado.getDouble("precio"),
-                        resultado.getDouble("precio_final"),
+                System.out.println(resultado.getInt("id_producto") + "\t" +
+                        resultado.getString("nombre") + "\t" +
+                        resultado.getInt("descuento_pct") + "%\t" +
+                        resultado.getDouble("precio") + "€\t" +
+                        resultado.getDouble("precio_final") + "€\t" +
                         resultado.getString("marca"));
             }
 
-            if (!hay) System.out.println("No hay productos en oferta.");
+            if (!hay) System.out.println("No hay productos en oferta");
 
             resultado.close();
             ps.close();
@@ -338,15 +330,12 @@ public class Main {
         double max = sc.nextDouble();
         sc.nextLine();
 
-        String sql = """
-                SELECT p.id_producto, p.nombre, p.precio,
-                       m.nombre AS marca, s.nombre AS seccion
-                FROM productos p
-                JOIN marcas    m ON p.id_marca   = m.id_marca
-                JOIN secciones s ON p.id_seccion = s.id_seccion
-                WHERE p.precio BETWEEN ? AND ?
-                ORDER BY p.precio ASC
-                """;
+        String sql = "SELECT p.id_producto, p.nombre, p.precio, m.nombre AS marca, s.nombre AS seccion " +
+                "FROM productos p " +
+                "JOIN marcas m ON p.id_marca = m.id_marca " +
+                "JOIN secciones s ON p.id_seccion = s.id_seccion " +
+                "WHERE p.precio BETWEEN ? AND ? " +
+                "ORDER BY p.precio ASC";
 
         try {
             Connection conexion = DriverManager.getConnection(url, usuario, contraseña);
@@ -357,18 +346,16 @@ public class Main {
             ResultSet resultado = ps.executeQuery();
 
             System.out.println("\n--- PRODUCTOS ENTRE " + min + "€ Y " + max + "€ ---");
-            System.out.printf("%-6s %-30s %-10s %-20s %s%n",
-                    "ID", "Nombre", "Precio", "Marca", "Sección");
-            System.out.println("-".repeat(80));
+            System.out.println("ID\tNombre\tPrecio\tMarca\tSección");
+            System.out.println("--------------------------------------------------");
 
             boolean hay = false;
             while (resultado.next()) {
                 hay = true;
-                System.out.printf("%-6d %-30s %-10.2f %-20s %s%n",
-                        resultado.getInt("id_producto"),
-                        resultado.getString("nombre"),
-                        resultado.getDouble("precio"),
-                        resultado.getString("marca"),
+                System.out.println(resultado.getInt("id_producto") + "\t" +
+                        resultado.getString("nombre") + "\t" +
+                        resultado.getDouble("precio") + "€\t" +
+                        resultado.getString("marca") + "\t" +
                         resultado.getString("seccion"));
             }
 
@@ -389,15 +376,12 @@ public class Main {
         System.out.print("Introduce parte del nombre: ");
         String nombre = sc.nextLine();
 
-        String sql = """
-                SELECT p.id_producto, p.nombre, p.precio, p.stock,
-                       m.nombre AS marca, s.nombre AS seccion
-                FROM productos p
-                JOIN marcas    m ON p.id_marca   = m.id_marca
-                JOIN secciones s ON p.id_seccion = s.id_seccion
-                WHERE p.nombre LIKE ?
-                ORDER BY p.nombre
-                """;
+        String sql = "SELECT p.id_producto, p.nombre, p.precio, p.stock, m.nombre AS marca, s.nombre AS seccion " +
+                "FROM productos p " +
+                "JOIN marcas m ON p.id_marca = m.id_marca " +
+                "JOIN secciones s ON p.id_seccion = s.id_seccion " +
+                "WHERE p.nombre LIKE ? " +
+                "ORDER BY p.nombre";
 
         try {
             Connection conexion = DriverManager.getConnection(url, usuario, contraseña);
@@ -407,19 +391,17 @@ public class Main {
             ResultSet resultado = ps.executeQuery();
 
             System.out.println("\n--- RESULTADOS PARA: \"" + nombre + "\" ---");
-            System.out.printf("%-6s %-35s %-10s %-8s %-20s %s%n",
-                    "ID", "Nombre", "Precio", "Stock", "Marca", "Sección");
-            System.out.println("-".repeat(90));
+            System.out.println("ID\tNombre\tPrecio\tStock\tMarca\tSección");
+            System.out.println("-----------------------------------------------------------------");
 
             boolean hay = false;
             while (resultado.next()) {
                 hay = true;
-                System.out.printf("%-6d %-35s %-10.2f %-8d %-20s %s%n",
-                        resultado.getInt("id_producto"),
-                        resultado.getString("nombre"),
-                        resultado.getDouble("precio"),
-                        resultado.getInt("stock"),
-                        resultado.getString("marca"),
+                System.out.println(resultado.getInt("id_producto") + "\t" +
+                        resultado.getString("nombre") + "\t" +
+                        resultado.getDouble("precio") + "€\t" +
+                        resultado.getInt("stock") + "\t" +
+                        resultado.getString("marca") + "\t" +
                         resultado.getString("seccion"));
             }
 
